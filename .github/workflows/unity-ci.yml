@@ -1,0 +1,29 @@
+name: Unity CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Playmode/Editmode Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-${{ hashFiles('**/Packages/manifest.json') }}
+          restore-keys: Library-${{ runner.os }}-
+      - name: Unity - Test
+        uses: game-ci/unity-test-runner@v4
+        with:
+          unityVersion: 2022.3.39f1
+          testMode: all
+          customParameters: -nographics
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestResults
+          path: artifacts

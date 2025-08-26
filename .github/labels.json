@@ -1,0 +1,14 @@
+[
+  { "name": "type:feature", "color": "1d76db" },
+  { "name": "type:task", "color": "6f42c1" },
+  { "name": "area:systems", "color": "0052cc" },
+  { "name": "area:ui", "color": "0e8a16" },
+  { "name": "area:data", "color": "5319e7" },
+  { "name": "area:services", "color": "1f883d" },
+  { "name": "area:meta", "color": "5319e7" },
+  { "name": "status:ready", "color": "c2e0c6" },
+  { "name": "status:in-progress", "color": "fbca04" },
+  { "name": "status:blocked", "color": "d93f0b" },
+  { "name": "status:review", "color": "fef2c0" },
+  { "name": "status:done", "color": "0e8a16" }
+]

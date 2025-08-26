@@ -1,0 +1,407 @@
+features:
+  # ========== PHASE 0 — FOUNDATIONS ==========
+  - title: Project Bootstrap & Game State
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Entry point scene loads Main Menu without errors
+      - [ ] Game state flow: Boot → MainMenu → Gameplay
+      - [ ] ServiceLocator available globally (DI-lite)
+      - [ ] Editor-only "Restart Game" menu item
+    prompts: |
+      Create Game.cs (singleton), GameState enum, SceneLoader utility.
+      Place new files in /Assets/_Project/Scripts/Core and /Utilities.
+      Provide a short Hooking notes section at the end.
+
+  - title: Time Service & Offline Progress (MVP)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] ITimeService returns UtcNow (server later)
+      - [ ] Store LastUtcTicks on quit; compute elapsed on load
+      - [ ] Grant cycles for each active job (linear)
+      - [ ] Unit tests for completed cycles math
+    prompts: |
+      Implement ITimeService and TimeService in Core/Time.
+      Add OfflineGrant with CompletedCycles(double elapsed, double duration, double speedMultiplier).
+      Tests in /Assets/_Project/Tests/.
+
+  - title: Save/Load Local JSON (V1)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] ISaveSystem with SaveData model (gold, gems, fame, inventory, workers, guild)
+      - [ ] Save to PlayerPrefs JSON; robust to missing fields
+      - [ ] Manual Save/Load debug buttons
+    prompts: |
+      Implement ISaveSystem and SaveSystem in Core/Save.
+      Include version and migration stub.
+      Provide minimal editor window for manual save/load.
+
+  - title: Data ScriptableObjects (Defs)
+    labels: [type:feature, area:data, status:ready]
+    spec: |
+      - [ ] SkillDef, ItemDef, RecipeDef, QuestDef, EnemyDef, LootTable
+      - [ ] Designers can add defs without code changes
+      - [ ] Addressables groups created for /Data
+    prompts: |
+      Create ScriptableObject definitions under /Assets/_Project/Scripts/Data and sample assets in /Assets/_Project/Data.
+      Add README.md describing fields.
+
+  - title: Currency & Inventory (Stacks)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Gold, Gems, Fame tracked in SaveData
+      - [ ] Inventory with stackable items and capacity
+      - [ ] API: AddItem, RemoveItem, HasItems
+      - [ ] Unit tests for edge cases (overfill, insufficient)
+    prompts: |
+      Create InventoryService and CurrencyService in Systems/.
+      Keep pure logic; no UI here.
+      Tests in Tests/InventoryServiceTests.cs.
+
+  - title: Event Bus (lightweight)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Publish/Subscribe for core events (JobStarted, JobCompleted, CurrencyChanged)
+      - [ ] No allocations per frame; unsubscribe safe
+    prompts: |
+      Implement IEventBus and EventBus in Core/Events.
+      Provide event types as structs.
+
+  # ========== PHASE 1 — CORE LOOP ==========
+  - title: Progress Job Engine
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] ProgressJob supports duration, speed multiplier, crit chance
+      - [ ] JobRunner ticks active jobs (Update)
+      - [ ] Analytics: job_start, job_complete
+      - [ ] Unit tests for tick/complete and crit path
+    prompts: |
+      Add /Systems/Progress/ProgressJob.cs and JobRunner.cs.
+      Fire events on start/complete via EventBus.
+
+  - title: Worker/Hero Entity (MVP)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Worker model: name, level per skill, equipment slots, state (Idle/Working/Cooldown)
+      - [ ] Serialization in SaveData
+      - [ ] Derived stats exposed (Speed%, Yield%, Crit%, XP%)
+    prompts: |
+      Implement WorkerService and Worker model in Systems/Workers.
+      Provide factory for initial worker.
+
+  - title: Gathering Loop (Nodes & Yields)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Nodes: Wood, Stone, Ore, Herbs (T1–T3 durations/yields)
+      - [ ] Assign worker → produce mats
+      - [ ] Remote Config multiplier for duration/yield
+      - [ ] Telemetry for run/complete
+    prompts: |
+      Create GatheringSystem in Systems/Gathering and SO assets in /Data/Gathering.
+      Integrate InventoryService for outputs.
+
+  - title: Refining Loop (Raw → Refined)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Recipe inputs validated; consumes inventory
+      - [ ] Outputs added on completion
+      - [ ] Error messages for blocked state
+      - [ ] Tests for missing mats and success path
+    prompts: |
+      Implement RefiningSystem in Systems/Refining.
+      Use RecipeDef and InventoryService.
+
+  - title: Crafting + Equipment Bonuses
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Craft items from recipes; unlocks by skill level
+      - [ ] Equip slots: Head, Chest, Hands, Weapon, Trinket
+      - [ ] Bonuses modify job calculations
+      - [ ] Tooltip exposes resulting speed/yield deltas
+    prompts: |
+      Implement CraftingSystem and EquipmentService in Systems/.
+      Provide GetEffectiveStats(worker) API.
+
+  - title: Hunting (Proto) & Loot Tables
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Start hunt job; on completion, grant gold + loot roll
+      - [ ] 3 enemies, 2 loot tables
+      - [ ] Stamina (simple per-hunt cost)
+    prompts: |
+      Create HuntingSystem in Systems/Hunting.
+      Implement LootRoller using EnemyDef.LootTable.
+
+  - title: Job Assignment UI + Progress Bars
+    labels: [type:feature, area:ui, status:ready]
+    spec: |
+      - [ ] Generic ProgressBarWidget (fill, time left)
+      - [ ] Assign worker to selected job; show reason if blocked
+      - [ ] One unified job card used by all tabs
+    prompts: |
+      Implement UI prefabs under /UI/Prefabs and presenters under /Scripts/UI.
+      Follow MV(P) approach; no logic in MonoBehaviours beyond wiring.
+
+  # ========== PHASE 2 — QUESTS & GUILD ==========
+  - title: Quest Board (Accept/Assign/Complete)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Generate quests by tier; requirements (skill, items)
+      - [ ] Assign eligible worker, show rewards
+      - [ ] Rewards: gold, mats, fame; analytics events
+    prompts: |
+      Implement QuestSystem in Systems/Quests.
+      UI list with filter, accept, and claim buttons.
+
+  - title: Fame & Unlocks
+    labels: [type:feature, area:meta, status:ready]
+    spec: |
+      - [ ] Fame thresholds unlock new tiers (nodes, recipes, quests)
+      - [ ] Fame tracked in SaveData; progress bar in UI
+    prompts: |
+      Create UnlocksService with threshold table (Remote Config override).
+      Fire event on unlock changes.
+
+  - title: Tavern Recruitment
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Roster with rarity rolls; gold cost to recruit
+      - [ ] Cap by Guild Level; add to workers on accept
+      - [ ] Daily reroll timer (server time later)
+    prompts: |
+      Implement TavernService and simple UI.
+      Use Addressables icons for candidates.
+
+  - title: Guild Level & Concurrent Slots
+    labels: [type:feature, area:meta, status:ready]
+    spec: |
+      - [ ] Guild Level gates active job slots and tavern size
+      - [ ] Level up cost in gold + fame
+    prompts: |
+      Meta/GuildService with GetConcurrentJobs() and LevelUpGuild().
+
+  # ========== PHASE 3 — SERVICES & LIVE ==========
+  - title: Firebase Auth (Anonymous → Google Play link)
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] Anonymous sign-in on first run
+      - [ ] Link to Google Play Games account on request
+      - [ ] Error surfaced; retry safe
+    prompts: |
+      Define IAuthService with SignInAnonymouslyAsync(), LinkGooglePlayAsync(), SignOutAsync().
+      Provide stub that simulates success for MVP.
+
+  - title: Cloud Save (Firestore/RTDB stub)
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] ICloudSaveService Load/Save JSON blob
+      - [ ] Conflict: prefer latest, merge currencies
+      - [ ] Manual Cloud Sync button in Settings
+    prompts: |
+      Implement interface and local stub; later swap to Firebase.
+      Add serializer tests for forward/backward compatibility.
+
+  - title: Remote Config (Tunables)
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] Fetch on boot; cache fallback
+      - [ ] Keys: job_duration_scale, drop_rate_scale, ad_cooldown_s, rewarded_multiplier
+      - [ ] Debug screen to view/refresh values
+    prompts: |
+      IRemoteConfigService with GetFloat/GetInt/GetString and RefreshAsync().
+
+  - title: Analytics Events (Firebase)
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] login, session_start, tutorial_complete
+      - [ ] worker_assign, job_start, job_complete
+      - [ ] quest_accept, quest_complete, recruit
+      - [ ] ad_reward, iap_purchase, fame_level_up
+    prompts: |
+      IAnalyticsService with LogEvent(name, params).
+      Add calls in systems; include unit test to verify calls via mock.
+
+  - title: Rewarded Ads (AdMob)
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] Placements: Double Rewards, Instant Finish (last 20%), Daily Booster
+      - [ ] Cooldowns via Remote Config
+      - [ ] Only grant on verified success callback
+    prompts: |
+      IAdsService ShowRewarded(placementId) → Task<AdResult>.
+      Wire to Gathering/Refining/Crafting completion views.
+
+  - title: IAP Skeleton (Google Billing)
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] Products: Gem packs, Starter Pack (non-consumable bonus item), Ad Remover (optional)
+      - [ ] Purchase, restore, and receipt persistence
+      - [ ] Test IDs configured; fake UI for MVP
+    prompts: |
+      IIapService PurchaseAsync(productId), RestoreAsync(), IsOwned(non-consumable).
+      Add simple shop UI prefab.
+
+  # ========== PHASE 4 — UI/UX ==========
+  - title: Main HUD & Tabs
+    labels: [type:feature, area:ui, status:ready]
+    spec: |
+      - [ ] HUD shows gold, gems, fame; active jobs list
+      - [ ] Tabs: Gather, Refine, Craft, Hunt, Quests, Tavern, Guild, Inventory
+      - [ ] 2-tap rule to start any job
+    prompts: |
+      Create UI canvases and navigation controller.
+      Keep presenters slim; use services for data.
+
+  - title: Tooltips & Eligibility Messaging
+    labels: [type:feature, area:ui, status:ready]
+    spec: |
+      - [ ] Gray-out blocked actions with clear reason
+      - [ ] Long-press/“i” shows detailed requirements
+    prompts: |
+      Add TooltipWidget and EligibilityService to produce user-friendly strings.
+
+  - title: Feedback & Haptics
+    labels: [type:feature, area:ui, status:ready]
+    spec: |
+      - [ ] +X flyouts on tick/complete, rarity flash on loot
+      - [ ] Android haptics on key actions (toggle)
+    prompts: |
+      Create FeedbackService: SpawnFlyout(text, worldPos), Vibrate(VibeType).
+
+  - title: Settings Screen
+    labels: [type:feature, area:ui, status:ready]
+    spec: |
+      - [ ] Toggles: music/sfx/haptics; Cloud Sync; Reset Data (confirm)
+      - [ ] Build/version shown; Debug buttons (Refresh RC)
+    prompts: |
+      Implement SettingsView + presenter; wire to services.
+
+  # ========== PHASE 5 — CONTENT PACK (MVP) ==========
+  - title: Content Pack — Items & Recipes (MVP)
+    labels: [type:feature, area:data, status:ready]
+    spec: |
+      - [ ] 20 items (mats/refined/equipment) across 4 rarities
+      - [ ] 6 recipes (refining/crafting); T1–T3 timings
+    prompts: |
+      Create SO assets under /Data/Items and /Data/Recipes with icons (placeholders ok).
+
+  - title: Content Pack — Enemies & Loot (MVP)
+    labels: [type:feature, area:data, status:ready]
+    spec: |
+      - [ ] 3 enemies with durations and loot tables (2 tables shared)
+    prompts: |
+      SOs under /Data/Enemies; balancing constants in YAML/CSV included as text for documentation.
+
+  - title: Content Pack — Quests & Fame Thresholds (MVP)
+    labels: [type:feature, area:data, status:ready]
+    spec: |
+      - [ ] 10 early quests, 10 mid quests with rewards
+      - [ ] Fame thresholds: 20/60/150 (Remote Config override)
+    prompts: |
+      Create QuestDef assets and a FameConfig provider.
+
+  # ========== PHASE 6 — QA, CI, BUILD ==========
+  - title: Unity Tests & Assembly Definitions
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Create asmdef for Tests and Runtime
+      - [ ] Add tests for OfflineGrant, Inventory, ProgressJob
+    prompts: |
+      Place asmdef files in Scripts/ and Tests/.
+      Ensure CI-friendly.
+
+  - title: GitHub Actions — Unity Test Runner
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] CI runs editmode+playmode tests on PR and main
+      - [ ] Artifacts uploaded
+    prompts: |
+      Add .github/workflows/unity-ci.yml using game-ci/unity-test-runner.
+
+  - title: Android Build Pipeline (Manual)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Build settings for Android (portrait, min API 24+)
+      - [ ] Keystore doc; Build & run on device checklist
+    prompts: |
+      Provide Editor script for quick Android build; include README.
+
+  # ========== POST-LAUNCH BACKLOG ==========
+  - title: Skill Minigames (Boosters)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Optional micro-minigames to accelerate jobs for N minutes
+      - [ ] Ad entry variant; cooldowns via Remote Config
+    prompts: |
+      Abstract IMinigame; start with a simple timing bar prototype.
+
+  - title: Dungeons/Raids (Multi-slot Assignments)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Multi-worker jobs with cumulative stats
+      - [ ] Multi-chest rewards and rarity guarantees
+    prompts: |
+      Extend Job model to team jobs; UI group assignment flow.
+
+  - title: Worker Traits & Synergies
+    labels: [type:feature, area:meta, status:ready]
+    spec: |
+      - [ ] Tags (Miner, Herbalist, Swift) that affect specific stations
+      - [ ] Simple synergy bonuses when combined
+    prompts: |
+      Add trait system and synergy evaluation to EffectiveStats.
+
+  - title: Equipment Sets & Collections
+    labels: [type:feature, area:meta, status:ready]
+    spec: |
+      - [ ] Set bonuses at 2/3/5 pieces
+      - [ ] Collection book with small rewards
+    prompts: |
+      Extend ItemDef with SetId and bonuses; UI collection page.
+
+  - title: Seasonal Events via Remote Config
+    labels: [type:feature, area:meta, status:ready]
+    spec: |
+      - [ ] Event flags toggle content/loot boosts
+      - [ ] Limited-time quests/items
+    prompts: |
+      Add EventService reading RC; gate content by flag.
+
+  - title: Interstitials A/B (Post-MVP)
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] Interstitials only on voluntary screens
+      - [ ] Experiment buckets in RC
+    prompts: |
+      Implement ExperimentService; respect Ad Remover entitlement.
+
+  - title: Async Leaderboards (Fame Weekly)
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] Weekly fame totals; top N display
+      - [ ] Anonymous or GPG linked name
+    prompts: |
+      Stub a simple backend-less local board first; plan Firebase function later.
+
+  - title: Cloud Save — Advanced Conflict UI
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] Present “Device vs Cloud” diff (currencies, time played)
+      - [ ] Player chooses; default latest wins
+    prompts: |
+      Build a small compare view; extend merge policy.
+
+  - title: Telemetry Dashboard (CSV Export)
+    labels: [type:feature, area:services, status:ready]
+    spec: |
+      - [ ] Export anonymized session metrics to CSV for balancing
+      - [ ] Aggregates: avg job duration, quest completion rate
+    prompts: |
+      Implement a local CSV writer and a debug screen.
+
+  - title: Performance Pass (Mobile)
+    labels: [type:feature, area:systems, status:ready]
+    spec: |
+      - [ ] Profile allocations; eliminate per-frame GC in hot paths
+      - [ ] Object pool for UI flyouts
+    prompts: |
+      Add simple pooling utility and replace Instantiate in FeedbackService.

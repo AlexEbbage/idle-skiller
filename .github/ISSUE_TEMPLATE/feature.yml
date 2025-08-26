@@ -1,0 +1,37 @@
+name: Feature
+description: Implement a game feature from the roadmap
+labels: ["type:feature", "status:ready"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this matters (player value, economy impact)
+      placeholder: Brief background...
+  - type: textarea
+    id: spec
+    attributes:
+      label: Spec / Acceptance Criteria
+      description: Given/When/Then + measurable outcomes
+      placeholder: |
+        - [ ] GIVEN <state> WHEN <action> THEN <result>
+        - [ ] Telemetry: <events>
+        - [ ] Errors handled
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Implementation Tasks
+      description: Fine-grained subtasks (checklist)
+      value: |
+        - [ ] Data: ScriptableObjects
+        - [ ] Runtime: Systems
+        - [ ] UI: Prefabs + Presenter
+        - [ ] Save/Load integrated
+        - [ ] Analytics hooks
+        - [ ] Unit tests
+  - type: textarea
+    id: prompts
+    attributes:
+      label: Copilot Prompts
+      description: Paste prompts for Copilot/Codex to use
+      placeholder: See /docs/copilot-prompts.md
