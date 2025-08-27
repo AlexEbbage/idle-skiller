@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace IdleSkiller.Core.Events
 {
+    /// <summary>
+    /// Basic in-memory implementation of <see cref="IEventBus"/>.
+    /// </summary>
     public class EventBus : IEventBus
     {
         private class EventStream<T> where T : struct

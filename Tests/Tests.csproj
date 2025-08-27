@@ -13,12 +13,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="InventoryServiceTests.cs" />
-    <Compile Include="GatheringSystemTests.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\SaveData.cs" />
+    <Compile Include="InventoryServiceTests.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\InventoryService.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\CurrencyService.cs" />
     <Compile Include="EventBusTests.cs" />
+    <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Core\Events\IEventBus.cs" />
+    <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Core\Events\EventBus.cs" />
+    <Compile Include="ProgressJobTests.cs" />
+    <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\Progress\ProgressJob.cs" />
+    <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\Progress\JobRunner.cs" />
+    <Compile Include="GatheringSystemTests.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Core\Events\*.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\Gathering\IGatheringNode.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\Gathering\GatheringSystem.cs" />
