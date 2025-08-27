@@ -1,17 +1,36 @@
-name: Unity Activation (one-time)
-on: workflow_dispatch
+name: Unity CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
 
 jobs:
-  request:
+  test:
+    name: Playmode/Editmode Tests
     runs-on: ubuntu-latest
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
     steps:
       - uses: actions/checkout@v4
-      - name: Request activation file
-        uses: game-ci/unity-request-activation-file@v2
+
+      - uses: actions/cache@v4
         with:
-          unityVersion: 2022.3.27f1
-      - name: Upload .alf
+          path: Library
+          key: Library-${{ runner.os }}-${{ hashFiles('**/Packages/manifest.json') }}
+          restore-keys: |
+            Library-${{ runner.os }}-
+
+      - name: Unity - Test
+        uses: game-ci/unity-test-runner@v4
+        with:
+          unityVersion: 2022.3.39f1
+          testMode: all
+          customParameters: -nographics
+
+      - name: Upload Test Results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Unity_v2022.3.27f1.alf
-          path: ./*.alf
+          name: TestResults
+          path: artifacts
