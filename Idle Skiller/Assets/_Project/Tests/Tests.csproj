@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../Scripts/Core/Time/*.cs" />
+    <Compile Include="../Scripts/Systems/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NUnit" Version="4.1.0" />
