@@ -1,4 +1,4 @@
-name: Unity CI
+name: Unity Activation
 
 on:
   pull_request:
@@ -9,20 +9,40 @@ jobs:
   test:
     name: Playmode/Editmode Tests
     runs-on: ubuntu-latest
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      # optional but fine to include:
+      UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify UNITY_LICENSE presence
+        shell: bash
+        run: |
+          if [ -z "${UNITY_LICENSE:-}" ]; then
+            echo "::error::UNITY_LICENSE is empty or not available. Make sure the repo secret is set and this is not a forked PR."
+            exit 1
+          fi
+          # show only size; content is masked by GitHub anyway
+          echo "UNITY_LICENSE length: $(printf %s "$UNITY_LICENSE" | wc -c)"
+
       - uses: actions/cache@v4
         with:
           path: Library
           key: Library-${{ runner.os }}-${{ hashFiles('**/Packages/manifest.json') }}
-          restore-keys: Library-${{ runner.os }}-
+          restore-keys: |
+            Library-${{ runner.os }}-
+
       - name: Unity - Test
         uses: game-ci/unity-test-runner@v4
         with:
           unityVersion: 2022.3.39f1
           testMode: all
           customParameters: -nographics
+
       - name: Upload Test Results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: TestResults
