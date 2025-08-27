@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using IdleSkiller.Systems.Workers;
 
 namespace IdleSkiller.Systems
 {
@@ -11,5 +12,7 @@ namespace IdleSkiller.Systems
         public int InventoryCapacity { get; set; } = 0;
 
         public Dictionary<string, int> Inventory { get; set; } = new Dictionary<string, int>();
+
+        public List<Worker> Workers { get; set; } = new List<Worker>();
     }
 }

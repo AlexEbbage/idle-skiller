@@ -20,6 +20,6 @@ namespace IdleSkiller.Core.Events
         /// <summary>
         /// Publish an event to all subscribers.
         /// </summary>
-        void Publish<T>(T evt) where T : struct;
+        void Publish<T>(in T eventData) where T : struct;
     }
 }
