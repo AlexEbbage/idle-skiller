@@ -14,8 +14,11 @@
 
   <ItemGroup>
     <Compile Include="InventoryServiceTests.cs" />
+    <Compile Include="GatheringSystemTests.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\SaveData.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\InventoryService.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\CurrencyService.cs" />
+    <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\Gathering\IGatheringNode.cs" />
+    <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\Gathering\GatheringSystem.cs" />
   </ItemGroup>
 </Project>
