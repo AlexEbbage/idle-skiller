@@ -17,5 +17,7 @@
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\SaveData.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\InventoryService.cs" />
     <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Systems\CurrencyService.cs" />
+    <Compile Include="EventBusTests.cs" />
+    <Compile Include="..\Idle Skiller\Assets\_Project\Scripts\Core\Events\*.cs" />
   </ItemGroup>
 </Project>
